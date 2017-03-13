@@ -2,7 +2,14 @@ package gla.cs.joose.coursework.invmgtclient.model;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.client.WebTarget;
+import gla.cs.joose.coursework.invmgtclient.util.*;
+
+import gla.cs.joose.coursework.invmgtclient.util.Util;
 
 public class InvmgtClient {
 	private static Client client;
@@ -37,9 +44,17 @@ public class InvmgtClient {
 	public Object updateRequest(long updateitemid,  long newBarcode, 
 							 String newItemName, String newItemType_s,
 							 int newQty, String newSupplier, String newDesc){
-		//Task 1
+		Builder oldItem = itemTarget.resolveTemplate("itemid", updateitemid).request();
 		
-		return null;	
+		Item itemToUpdate = new Item(newBarcode, newItemName , ItemType.getItemType(newItemType_s) , newQty , newSupplier, newDesc);
+		Response putResponse = oldItem.put(Entity.json(itemToUpdate));
+		
+		if (putResponse.getStatus() != 200) {
+            return (Object) putResponse.getStatus();
+        } else {
+        	return itemToUpdate;
+        }
+	
 	}
 	
 	/**
@@ -49,9 +64,10 @@ public class InvmgtClient {
 	 * @return returns a status code indicating the outcome of deleteRequest
 	 */
 	public int deleteRequest(long itemid){
-		//Task 2
+		Builder itemDel = itemTarget.resolveTemplate("itemid", itemid).request();
+		Response getResponse = itemDel.delete();
 		
-		return -1;
+		return getResponse.getStatus();
 	}
 	
 	/**
@@ -65,9 +81,14 @@ public class InvmgtClient {
 	 */
 	public Item[] searchRequest(String searchbydesc, String pattern, int limit){
 		
-		//Task 3
+		Builder items = itemsTarget.resolveTemplate("searchbydesc", searchbydesc)
+				.resolveTemplate("pattern", pattern)
+				.resolveTemplate("limit", limit)
+				.request(MediaType.APPLICATION_JSON);
+		Response getResponse = items.get();
 		
-		return null;
+		
+		return getResponse.readEntity(Item[].class);
 		
 	}
 	
@@ -83,9 +104,10 @@ public class InvmgtClient {
 	 * @return - returns a REST response status code indicating the outcome of addItemRequest
 	 */
 	public int addItemRequest(long barcode, String itemName, String itemType_s, int qty, String supplier, String desc){
-				
-		//Task 4
+		Item newItem = new Item(barcode, itemName, ItemType.getItemType(itemType_s), qty, supplier, desc);
+		Builder itemToAdd = itemsTarget.request();
+		Response postResponse = itemToAdd.post(Entity.json(newItem));
 		
-		return -1;
+		return postResponse.getStatus();
 	}
 }
