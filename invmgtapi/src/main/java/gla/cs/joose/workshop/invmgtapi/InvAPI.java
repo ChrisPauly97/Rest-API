@@ -48,13 +48,18 @@ public class InvAPI {
 	 * @param uriinfo
 	 * @return return a Response object containing a list of items that matches a search pattern and the status code	 * 		  
 	 */
-	public Response getItem(String searchbydesc, String pattern,int limit, @Context UriInfo uriinfo) {        
+	@GET
+	@Path("/items")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getItem(@QueryParam("searchbydesc")String searchbydesc, 
+			@QueryParam("pattern")String pattern, 
+			@QueryParam("limit")int limit, @Context UriInfo uriinfo) {        
        
 		Item[] results = ItemFactory.search(searchbydesc, pattern, limit);
         
-        //Task 6
-		
-		return null;
+		URI uri = uriinfo.getAbsolutePath();
+		return Response.created(uri).entity(results).status(Status.OK).build();
 		
 	}
 	
@@ -70,7 +75,9 @@ public class InvAPI {
 	 * @param uriinfo
 	 * @return return a Response object containing  the updated item and the status code
 	 */
-	public Response updateItem(long updateitemid,
+	@PUT
+	@Path("/items/{itemid}")
+	public Response updateItem(@PathParam("itemid")long updateitemid,
 							   long newBarcode,
 							   String newItemName, 
 							   String newItemType_s, 
@@ -94,9 +101,12 @@ public class InvAPI {
 			}
 		}	
 		
-		
-		//Task 7
-		return null;
+		String u_id = String.valueOf(updateitemid);
+		URI uri = uriinfo.getAbsolutePathBuilder().path(u_id).build();
+		if(updated){
+			return Response.created(uri).entity(uitem).status(Status.OK).build();
+		}
+		return Response.created(uri).entity(uitem).status(Status.INTERNAL_SERVER_ERROR).build();
 					
 	}
 	
@@ -127,9 +137,11 @@ public class InvAPI {
 				
 		boolean done = ItemFactory.addItem(item);
 		
-		// Task 8	
+		if(done){
+			return Response.status(Status.CREATED).build();
+		}
+		return Response.status(Status.NOT_ACCEPTABLE).build();
 		
-		return null;
 	}
 	
 }

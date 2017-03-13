@@ -4,6 +4,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.client.WebTarget;
@@ -80,14 +81,10 @@ public class InvmgtClient {
 	 * @return returns a list of items that matches the searchRequest parameters
 	 */
 	public Item[] searchRequest(String searchbydesc, String pattern, int limit){
-		
-		Builder items = itemsTarget.resolveTemplate("searchbydesc", searchbydesc)
-				.resolveTemplate("pattern", pattern)
-				.resolveTemplate("limit", limit)
-				.request(MediaType.APPLICATION_JSON);
+		Builder items = itemsTarget.queryParam("searchbydesc", searchbydesc)
+				.queryParam("pattern", pattern)
+				.queryParam("limit", limit).request(MediaType.APPLICATION_JSON);
 		Response getResponse = items.get();
-		
-		
 		return getResponse.readEntity(Item[].class);
 		
 	}
