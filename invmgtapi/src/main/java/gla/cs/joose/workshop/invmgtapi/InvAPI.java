@@ -136,11 +136,12 @@ public class InvAPI {
 		Item item = new Item(barcode, itemName, itemType, qty, supplier, desc);
 				
 		boolean done = ItemFactory.addItem(item);
+		URI uri = uriinfo.getAbsolutePath();
 		
 		if(done){
-			return Response.status(Status.CREATED).build();
+			return Response.created(uri).status(Status.CREATED).build();
 		}
-		return Response.status(Status.NOT_ACCEPTABLE).build();
+		return Response.created(uri).status(Status.NOT_ACCEPTABLE).build();
 		
 	}
 	
