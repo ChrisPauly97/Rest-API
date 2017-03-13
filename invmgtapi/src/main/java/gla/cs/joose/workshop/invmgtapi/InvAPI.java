@@ -1,12 +1,19 @@
 package gla.cs.joose.workshop.invmgtapi;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+
+import java.net.URI;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import gla.cs.joose.coursework.invmgtapi.invmgt.model.Item;
 import gla.cs.joose.coursework.invmgtapi.invmgt.model.ItemFactory;
@@ -20,12 +27,16 @@ public class InvAPI {
 	 * @param uriinfo
 	 * @return Return a Response object containing the status code after delete operation
 	 */
-	public Response deleteItem(long itemid,@Context UriInfo uriinfo) {		
+	@DELETE
+	@Path("/items/{itemid}")
+	public Response deleteItem(@PathParam("itemid") long itemid ,@Context UriInfo uriinfo) {		
 		boolean deleted = ItemFactory.delete(itemid);
-		
-		// Task 5
-		
-		return null;
+		if(!deleted){
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		return Response.status(Status.OK).build();
+	
+
 	}
 	
 	/**
