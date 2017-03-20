@@ -1,5 +1,6 @@
-package gla.cs.joose.workshop.invmgtapi;
+package gla.cs.joose.coursework.invmgtapi;
 
+import javax.swing.text.html.parser.Entity;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -18,7 +19,7 @@ import javax.ws.rs.core.Response.Status;
 import gla.cs.joose.coursework.invmgtapi.invmgt.model.Item;
 import gla.cs.joose.coursework.invmgtapi.invmgt.model.ItemFactory;
 import gla.cs.joose.coursework.invmgtapi.invmgt.model.ItemType;
-
+@Path("/invapi")
 public class InvAPI {
 	
 	/**
@@ -50,15 +51,15 @@ public class InvAPI {
 	 */
 	@GET
 	@Path("/items")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getItem(@QueryParam("searchbydesc")String searchbydesc, 
-			@QueryParam("pattern")String pattern, 
-			@QueryParam("limit")int limit, @Context UriInfo uriinfo) {        
+
+	public Response getItem(@QueryParam("searchbydesc")String searchbydesc,
+			@QueryParam("pattern")String pattern,
+			@QueryParam("limit")int limit, @Context UriInfo uriinfo) {
        
 		Item[] results = ItemFactory.search(searchbydesc, pattern, limit);
         
 		URI uri = uriinfo.getAbsolutePath();
+		System.out.println(uri);
 		return Response.created(uri).entity(results).status(Status.OK).build();
 		
 	}
@@ -77,13 +78,14 @@ public class InvAPI {
 	 */
 	@PUT
 	@Path("/items/{itemid}")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response updateItem(@PathParam("itemid")long updateitemid,
-							   long newBarcode,
-							   String newItemName, 
-							   String newItemType_s, 
-							   int newQty,
-							   String newSupplier,
-							   String newDesc,
+							   @FormParam("newBarcode")long newBarcode,
+							   @FormParam("newItemName")String newItemName,
+							   @FormParam("newItemType_s")String newItemType_s,
+							   @FormParam("newQty")int newQty,
+							   @FormParam("newSupplier")String newSupplier,
+							   @FormParam("newDesc")String newDesc,
 							   @Context UriInfo uriinfo){	
 				        
 		boolean updated = false;
@@ -104,8 +106,10 @@ public class InvAPI {
 		String u_id = String.valueOf(updateitemid);
 		URI uri = uriinfo.getAbsolutePathBuilder().path(u_id).build();
 		if(updated){
+			System.out.println(uri);
 			return Response.created(uri).entity(uitem).status(Status.OK).build();
 		}
+		System.out.println(uri);
 		return Response.created(uri).entity(uitem).status(Status.INTERNAL_SERVER_ERROR).build();
 					
 	}
@@ -122,14 +126,14 @@ public class InvAPI {
 	 * @return return a Response object containing  the status code of the operation
 	 */
 	@POST
-	@Path("/items") 
+	@Path("/items")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response addItem(long barcode,
-							String itemName, 
-					        String itemType_s, 
-					        int qty,
-					        String supplier,
-					        String desc,
+	public Response addItem(@FormParam("barcode") long barcode,
+							@FormParam("itemName") String itemName,
+							@FormParam("itemType_s")String itemType_s,
+							@FormParam("qty")int qty,
+							@FormParam("supplier")String supplier,
+							@FormParam("desc")String desc,
 					        @Context UriInfo uriinfo){			
 		        
 		ItemType itemType = ItemType.getItemType(itemType_s);
@@ -139,8 +143,10 @@ public class InvAPI {
 		URI uri = uriinfo.getAbsolutePath();
 		
 		if(done){
+			System.out.println(uri);
 			return Response.created(uri).status(Status.CREATED).build();
 		}
+		System.out.println(uri);
 		return Response.created(uri).status(Status.NOT_ACCEPTABLE).build();
 		
 	}

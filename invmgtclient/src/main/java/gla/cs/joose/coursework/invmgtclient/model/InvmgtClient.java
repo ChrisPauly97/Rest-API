@@ -25,7 +25,7 @@ public class InvmgtClient {
 	public InvmgtClient(){
 		client = ClientBuilder.newClient();
 		
-		baseTarget = client.target("http://localhost:8080/invmgtapi/webapi/invapi");
+		baseTarget = client.target("http://localhost:8080/webapi/invapi");
 		itemsTarget = baseTarget.path("items");
 		itemTarget = baseTarget.path("items").path("{itemid}");
 	}
@@ -46,14 +46,22 @@ public class InvmgtClient {
 							 String newItemName, String newItemType_s,
 							 int newQty, String newSupplier, String newDesc){
 		Builder oldItem = itemTarget.resolveTemplate("itemid", updateitemid).request();
-		
-		Item itemToUpdate = new Item(newBarcode, newItemName , ItemType.getItemType(newItemType_s) , newQty , newSupplier, newDesc);
-		Response putResponse = oldItem.put(Entity.json(itemToUpdate));
+		System.out.println(oldItem.toString());
+//		Item itemToUpdate = new Item(newBarcode, newItemName , ItemType.getItemType(newItemType_s) , newQty , newSupplier, newDesc);
+		Form form = new Form();
+		form.param("newBarcode",""+newBarcode);
+		form.param("newItemName",""+newItemName);
+		form.param("newItemType_s",""+newItemType_s);
+		form.param("newQty",""+newQty);
+		form.param("newSupplier",""+newSupplier);
+		form.param("newDesc",""+newDesc);
+
+		Response putResponse = oldItem.put(Entity.form(form));
 		
 		if (putResponse.getStatus() != 200) {
             return (Object) putResponse.getStatus();
         } else {
-        	return itemToUpdate;
+        	return putResponse.getEntity();
         }
 	
 	}
@@ -66,6 +74,7 @@ public class InvmgtClient {
 	 */
 	public int deleteRequest(long itemid){
 		Builder itemDel = itemTarget.resolveTemplate("itemid", itemid).request();
+		System.out.println(itemDel.toString());
 		Response getResponse = itemDel.delete();
 		
 		return getResponse.getStatus();
@@ -83,8 +92,10 @@ public class InvmgtClient {
 	public Item[] searchRequest(String searchbydesc, String pattern, int limit){
 		Builder items = itemsTarget.queryParam("searchbydesc", searchbydesc)
 				.queryParam("pattern", pattern)
-				.queryParam("limit", limit).request(MediaType.APPLICATION_JSON);
+				.queryParam("limit", limit).request();
+		System.out.println(items);
 		Response getResponse = items.get();
+		System.out.println(getResponse.toString());
 		return getResponse.readEntity(Item[].class);
 		
 	}
@@ -101,10 +112,19 @@ public class InvmgtClient {
 	 * @return - returns a REST response status code indicating the outcome of addItemRequest
 	 */
 	public int addItemRequest(long barcode, String itemName, String itemType_s, int qty, String supplier, String desc){
-		Item newItem = new Item(barcode, itemName, ItemType.getItemType(itemType_s), qty, supplier, desc);
+//		Item newItem = new Item(barcode, itemName, ItemType.getItemType(itemType_s), qty, supplier, desc);
 		Builder itemToAdd = itemsTarget.request();
-		Response postResponse = itemToAdd.post(Entity.json(newItem));
-		
+		System.out.println(itemToAdd);
+//		Response postResponse = itemToAdd.post(Entity.json(barcode,itemName,itemType_s,qty,supplier,desc));
+		Form form = new Form();
+		form.param("barcode", ""+barcode);
+		form.param("itemName", ""+itemName);
+		form.param("itemType_s", ""+itemType_s);
+		form.param("qty", ""+qty);
+		form.param("supplier", ""+supplier);
+		form.param("desc", ""+desc);
+		Response postResponse = itemToAdd.post(Entity.form(form));
+		System.out.println(postResponse);
 		return postResponse.getStatus();
 	}
 }
